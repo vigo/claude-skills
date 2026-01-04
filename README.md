@@ -18,4 +18,10 @@ git clone git@github.com:vigo/claude-skills.git skills
 
 Restart your claude; `/skills`
 
+How to invoke:
+
+1. Slash command: `/code-like-gopher`
+1. Ask directly: "Write go code" or "refactor this go code"
+1. Ask explicitly: "Write this function using a code-like-gopher skill"
+
 ---
