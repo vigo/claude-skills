@@ -706,6 +706,36 @@ ch := make(chan int, 1)
 // goroutine lifecycle coordination
 ```
 
+---
+
+## Pre-Commit Hooks
+
+If pre-commit config file `.pre-commit-config.yaml` doesn’t exists, ask user to
+install pre-commit:
+
+```bash
+brew install pre-commit
+```
+
+and install hooks:
+
+```bash
+pre-commit install
+```
+
+Use this minimum config:
+
+```yaml
+repos:
+  - repo: https://github.com/TekWizely/pre-commit-golang
+    rev: v1.0.0-rc.1
+    hooks:
+      - id: golangci-lint-mod
+      - id: go-mod-tidy
+      - id: go-test-mod
+```
+
+---
 
 ## Resources
 
