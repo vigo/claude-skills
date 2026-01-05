@@ -2,8 +2,9 @@
 
 What Skills are available?
 
-1. explaining-code - ~104 tokens - (grabbed from https://code.claude.com/docs/en/skills)
-1. code-like-gopher - ~5.0k tokens
+1. **explaining-code** - ~104 tokens - (grabbed from https://code.claude.com/docs/en/skills)
+1. **code-like-gopher** - ~5.0k tokens
+1. **code-like-djangonout** - ~5.9k tokens
 
 ---
 
