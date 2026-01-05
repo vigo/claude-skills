@@ -498,7 +498,7 @@ type ReadSeekCloser interface {
 Finally, the convention in Go is to use `MixedCaps` or `mixedCaps` rather than
 **underscores** to write multiword names.
 
-### Syntactic Sugars and Techiques
+### Syntactic Sugars and Techniques
 
 - Try to avoid Naked Returns / Named Returns, instead of `func sum(a, b int) (result int)`
   use : `func sum(a, b int) (int)`
