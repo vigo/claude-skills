@@ -735,6 +735,59 @@ repos:
       - id: go-test-mod
 ```
 
+## Commit Message Guidelines
+
+- Prefix: `[claude-opus]:` or `[claude-sonnet]:` based on model
+- Short summary in lowercase (max 50 chars)
+- Blank line, then bullet points with details
+- Include Claude Code footer
+- Use **present tense** in commit messages.
+- Always start the message with a **lowercase letter**.
+- Start with a **verb**, followed by a brief and clear description.
+
+Examples:
+
+- `fix login redirect issue`
+- `implement user profile page`
+- `remove unused dependencies`
+
+**If related to a GitHub issue**:
+
+- Add `Fixes #ISSUE-NUMBER` or `Closes #ISSUE-NUMBER` at the end of the commit
+  message. This auto closes issue on GitHub.
+- Include a direct link to the related GitHub issue.
+
+Also this commit-template is helpful:
+
+    #
+    # 3456789x123456789x123456789x123456789x123456789x
+    # Short description (subject) : 50 chars
+
+    # 3456789x123456789x123456789x123456789x123456789x123456789x123456789x12
+    # Long description : 72 chars
+    #
+    # - Why was this change necessary?
+    # - How does it address the problem?
+    # - Are there any side effects?
+    #
+    # Fixes #ticket
+    # Closes #ticket, #ticket, #ticket
+    #
+    # Include a link to the ticket, if any.
+    #
+
+Example:
+
+    [claude-opus]: add TXT and DOCX resume upload support
+    
+    - Convert TXT/DOCX files to PDF on upload using fpdf2 and python-docx
+    - Skip text extraction for pre-extracted content
+    - Add Unicode font support for Turkish characters
+    
+    🤖 Generated with [Claude Code](https://claude.com/claude-code)
+    
+    Co-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>
+
 ---
 
 ## Resources
