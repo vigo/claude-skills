@@ -1,6 +1,6 @@
 ---
 name: code-like-gopher
-description: Go programming guru. Follows go-teams conventions and coding style.
+description: Provides Go programming expertise, including language syntax, idiomatic patterns, concurrency, and standard library usage. Use when generating, analyzing, refactoring, or reviewing Go code.
 ---
 
 ## General Coding Approach
