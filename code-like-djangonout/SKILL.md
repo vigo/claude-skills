@@ -1,78 +1,102 @@
 ---
 name: code-like-djangonout
-description: ...
+description: Provides Django web framework expertise including project structure, models, views, admin, Celery tasks, testing, and Python best practices. Use when generating, analyzing, refactoring, or reviewing Django/Python code.
 ---
 
-## General Coding Approach
+# Django Development Skill
 
-All the naming, commenting must be in **English**. We are writing `python`
-code, using `django` web framework, we must follow python and django
-conventions.
+## When to Use
 
-Virtual environment must be activated, all the python packages should be
-installed to related environment.
+Use this skill when:
 
-Try to detect projects python version:
+- Writing, reviewing, or refactoring Django applications
+- Creating or modifying Django models, views, admin, forms
+- Setting up Django project structure and tooling
+- Implementing Celery tasks and signals
+- Writing Django tests
+- Configuring linters (ruff, pylint) for Python/Django
+
+## Prerequisites Check
+
+Before starting any Django work:
 
 ```bash
+# Check Python version
 python --version
-# or look for .python-version
+
+# Check for .python-version file
+cat .python-version 2>/dev/null
+
+# Verify virtual environment is active
+echo $VIRTUAL_ENV
+
+# Check Django version
+python -c "import django; print(django.VERSION)"
+
+# Check if ruff is available
+command -v ruff
 ```
 
 ---
 
-## Formatting and Linting the Code
+## Instructions
 
-`ruff` linter should be available and ready to use:
+### General Coding Approach
+
+- All naming and comments must be in **English**
+- Follow Python (PEP 8) and Django conventions
+- Virtual environment must be activated
+- Detect project's Python version and use appropriate features
+- **Do not use type annotations** (Django doesn't fully rely on them)
+- If annotations are needed, import: `from __future__ import annotations`
+
+---
+
+### Formatting and Linting
+
+#### Ruff Setup
 
 ```bash
-python -m pip install ruff 
+python -m pip install ruff
 ```
 
-Here is minimal python-ruff config (`.ruff.toml`)
+Minimal `.ruff.toml`:
 
 ```toml
 line-length = 119
 indent-width = 4
-target-version = "py314"
+target-version = "py312"
 exclude = [
     "**/migrations",
     "**/manage.py",
 ]
 
-
 [format]
 quote-style = "single"
-exclude = [
-    "**/manage.py",
-]
+exclude = ["**/manage.py"]
 
 [lint]
-allowed-confusables = ["ı","’"]
+select = ["ALL"]
+allowed-confusables = ["ı", "'"]
 mccabe.max-complexity = 15
 ignore = [
-    "ANN",
+    "ANN",    # annotations
+    "D",      # docstrings (pydocstyle)
     "D203",   # one-blank-line-before-class
     "D213",   # multi-line-summary-second-line
-    "ISC001",
-    "COM812",
-    "ERA",
-    "D",
-    "RUF012", # mutable-class-default
-    "FBT002", # boolean-default-value-positional-argument, django internals
-    "TD003",  # missing-todo-link
-    "FIX002", # line-contains-todo
-    "PT009",  # pytest-unittest-assertion
-    "PT019",  # pytest-fixture-param-without-value (unittest uses mock params)
-    "PT027",  # pytest-unittest-raises-assertion
+    "ISC001", # implicit string concat
+    "COM812", # missing trailing comma
+    "ERA",    # commented out code
+    "RUF012", # mutable class default
+    "FBT002", # boolean default positional arg
+    "TD003",  # missing todo link
+    "FIX002", # line contains todo
+    "PT009",  # pytest unittest assertion
+    "PT019",  # pytest fixture param
+    "PT027",  # pytest unittest raises
     "PGH004", # file-wide noqa
-    "INP001", 
-
-    # "COM812", # missing-trailing-comma
-    # "ISC001", # single-line-implicit-string-concatenation
-    # "D",
+    "INP001", # implicit namespace package
 ]
-select = ["ALL"]
 
 [lint.flake8-quotes]
 inline-quotes = "single"
@@ -86,9 +110,7 @@ max-positional-args = 8
 max-branches = 20
 
 [lint.isort]
-known-first-party = [
-    "core",  # name of the django-app
-]
+known-first-party = ["core"]
 section-order = [
     "future",
     "standard-library",
@@ -97,85 +119,101 @@ section-order = [
     "first-party",
     "local-folder",
 ]
+
 [lint.isort.sections]
-"django" = ["django"]
+django = ["django"]
 ```
 
-Ask user to add `pylint` if possible. `pylint` handles static checks, catches
-more errors than `ruff`. If `pylint` or `.pylintrc` doesn’t exists, you can
-create `.pylintrc` with:
+#### Pylint Setup
 
 ```bash
+python -m pip install pylint
+
+# Generate config if missing
 pylint --generate-rcfile > .pylintrc
 ```
 
-If you need to `noqa`, ask first. Some noqas are OK:
+#### Acceptable noqa Comments
 
-- # noqa: S324
-- # noqa: SLF001 (Model._meta)
-- # noqa: ARG002 (overriding django’s internal class methods)
+- `# noqa: S324` - hashlib security
+- `# noqa: SLF001` - Model._meta access
+- `# noqa: ARG002` - unused args in Django overrides
+
+Always ask before adding other noqa comments.
 
 ---
 
-## Coding Style
+### Coding Style
 
-Always use single quotes. Double quotes only allowed in `docstring` or some
-strings you can not avoid: `"vigo's number"`. Some examples:
+#### Quote Convention
+
+Always use **single quotes**. Double quotes only for docstrings or unavoidable 
+cases:
 
 ```python
+# ✅ Good
 user_name = 'vigo'
 page = request.GET.get('page')
+
+# ✅ Acceptable
+message = "vigo's number"
 ```
 
-Don’t use magic values:
+#### No Magic Values
 
 ```python
-# wrong
-def foo(user):
+# ❌ Bad
+def check_age(user):
     if user.age > 10:
         pass
 
-# good
+# ✅ Good
 USER_MAX_AGE = 10
 
-def foo(user):
+def check_age(user):
     if user.age > USER_MAX_AGE:
         pass
 ```
 
-Always get key from `dict` must use `.get`:
+#### Dict Access
+
+Always use `.get()` for dict access:
 
 ```python
-FOO['bar']       # is BAD!
-FOO.get('bar')   # is GOOD! use this
+# ❌ Bad
+value = FOO['bar']
+
+# ✅ Good
+value = FOO.get('bar')
+value = FOO.get('bar', 'default')
 ```
 
-Descriptive variable names, and concise `docstrings` that explain API usage choices.
+#### Error Handling
 
-Follow PEP 8 naming conventions.
-
-Detect the Python version used in the project, or ask the user if it cannot be
-determined. Generate code using **features** and **improvements** available in
-that Python version, and prefer version-specific best practices.
-
-Since **Django does not yet fully rely on** type annotations or static type
-checking, **do not use type annotations** in Python code. If you really need
-to use annotations, do not forget to import:
+Never use blind exceptions. Always handle specific exceptions:
 
 ```python
-from __future__ import annotations
+# ❌ Bad
+try:
+    do_something()
+except Exception:
+    pass
+
+# ✅ Good
+try:
+    do_something()
+except SpecificError as exc:
+    logger.exception('Operation failed: %s', exc)
+    raise
 ```
 
-Never ever make **blind-exceptions**. `except Exception:` is wrong, handle
-required exception.
+#### Service-Specific Exceptions
 
-Always add proper error handling when implementing some feature, service or
-refactoring the code. If you implement `NotificationService`, you must have
-an exception `NotificationServiceError`:
+Every service must have its own exception:
 
 ```python
-# exceptions.py example
-class <Project>Error(Exception):
+# exceptions.py
+class ProjectError(Exception):
     def __init__(self, message, humans=False, **extras):
         if humans:
             message = message.title()
@@ -184,74 +222,73 @@ class <Project>Error(Exception):
         self.message = message
         self.extras = extras
 
-class NotificationServiceError(<Project>Error): ...
+
+class NotificationServiceError(ProjectError):
+    ...
 
 
 # services/notification.py
 import logging
 
-logger = logging.getLogger('<project-ket>.NotificationService')
-service = NotificationService()
-try:
-    response = SomeOtherServiceRequest()
-except SomeOtherServiceRequestError as exc:
-    msg = 'error description' # or str(exc)
-    logger.exception(msg)
-    raise NotificationServiceError from exc
+logger = logging.getLogger('project.NotificationService')
+
+
+class NotificationService:
+    def send(self, recipient, message):
+        try:
+            response = ExternalAPI.send(recipient, message)
+        except ExternalAPIError as exc:
+            logger.exception('Failed to send notification')
+            raise NotificationServiceError('Notification failed') from exc
+        return response
 ```
 
-### Django Conventions
+---
 
-Django app structure should look like this:
+### Django Project Structure
 
-    core/
-        admin/
+```
+core/
+    admin/
+        __init__.py
+        user.py
+    fixtures/
+        core.user.json
+    forms/
+        __init__.py
+        user.py
+    management/
+        __init__.py
+        commands/
+            create_foo.py
+    migrations/
+    models/
+        __init__.py
+        user.py
+    services/
+        __init__.py
+        notification.py
+    signals/
+        __init__.py
+        user.py
+    tasks/
+        __init__.py
+        notification.py
+    templates/
+        auth/
+            signin.html
+    views/
+        __init__.py
+        auth/
             __init__.py
-            user.py
-            :
-            :
-        fixture/
-            core.user.json
-            :
-        forms/
-            __init__.py
-            user.py
-            :
-        management/
-            __init__.py
-            commands/
-                create_foo.py
-        migrations/
-        models/
-            __init__.py
-            user.py
-            :
-        services/
-            __init__.py
-            notification_service.py
-            :
-        signals/
-            __init__.py
-            user.py
-        tasks/
-            __init__.py
-            notification_task.py
-        templates/
-            auth/
-                signin.html
-            :
-            :
-        views/
-            __init__.py
-            auth/
-                __init__.py
-                login.py
-                :
-                :
-        checks.py
-        storage.py
+            login.py
+    checks.py
+    storage.py
+```
 
-Example <App>Config:
+---
+
+### AppConfig Example
 
 ```python
 # pylint: disable=W0611,C0415
@@ -265,15 +302,346 @@ class CoreConfig(AppConfig):
     name = 'core'
 
     def ready(self):
-        from .celery_signals import task_failure_handler
-        from .tasks.interview_expiration_tasks import check_interview_expiration_task
-        from .tasks.periodic_tasks import disable_completed_state_trackers_task
+        from .signals import user_signals
+        from .tasks import notification_tasks
 
         if settings.DEBUG:
             from .checks import check_environment_variables, check_models
 ```
 
-`checks.py`
+---
+
+### Model Rules
+
+#### Basic Structure
+
+```python
+from django.contrib.auth import get_user_model
+from django.db import models
+from django.utils.translation import gettext_lazy as _
+
+
+class PostManager(models.Manager):
+    def get_by_natural_key(self, author_email, title):
+        author = get_user_model().objects.get_by_natural_key(author_email)
+        return self.get(author=author, title=title)
+
+
+class Post(models.Model):
+    # 1. Field declarations
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name=_('created at'),
+    )
+    updated_at = models.DateTimeField(
+        auto_now=True,
+        verbose_name=_('updated at'),
+    )
+    title = models.CharField(
+        max_length=255,
+        verbose_name=_('title'),
+    )
+    body = models.TextField(
+        blank=True,
+        verbose_name=_('body'),
+    )
+    author = models.ForeignKey(
+        to=get_user_model(),
+        related_name='posts',
+        related_query_name='post',
+        on_delete=models.CASCADE,
+        verbose_name=_('author'),
+    )
+
+    # 2. Custom managers
+    objects = PostManager()
+
+    # 3. Class Meta
+    class Meta:
+        app_label = 'core'
+        db_table = 'post'
+        verbose_name = _('Post')
+        verbose_name_plural = _('Posts')
+
+    # 4. __str__
+    def __str__(self):
+        return f'{self.title}'
+
+    # 5. save (if needed)
+
+    # 6. natural_key
+    def natural_key(self):
+        return (self.author.email, self.title)
+
+    natural_key.dependencies = ['auth.user']
+
+    # 7. get_absolute_url (if needed)
+```
+
+#### Model Method Order
+
+1. Field declarations
+2. Custom managers
+3. `class Meta`
+4. `__str__`
+5. `save`
+6. `natural_key`
+7. `get_absolute_url`
+
+#### Model Checklist
+
+| Requirement | Example |
+|-------------|---------|
+| Manager with `get_by_natural_key` | `objects = PostManager()` |
+| `class Meta` with required attrs | `app_label`, `db_table`, `verbose_name`, `verbose_name_plural` |
+| `natural_key` method | Must match manager's `get_by_natural_key` |
+| `verbose_name` on all fields | Use `gettext_lazy`: `verbose_name=_('title')` |
+| Choices as callable | `choices=get_language_choices` |
+| Relational fields with all kwargs | `to`, `related_name`, `related_query_name`, `on_delete` |
+
+#### Choices
+
+Use callable for choices (allows changes without migration):
+
+```python
+def get_language_choices():
+    return settings.LANGUAGES
+
+
+class Page(models.Model):
+    language = models.CharField(
+        max_length=2,
+        choices=get_language_choices,
+        verbose_name=_('language'),
+    )
+```
+
+Or use Django's TextChoices:
+
+```python
+class LanguageChoices(models.TextChoices):
+    ENGLISH = 'en', _('English')
+    TURKISH = 'tr', _('Turkish')
+```
+
+Or stdlib Enum:
+
+```python
+from enum import StrEnum
+
+
+class CandidateStatus(StrEnum):
+    STARTED = 'started'
+    IN_PROGRESS = 'in_progress'
+    COMPLETED = 'completed'
+```
+
+#### Constraints and Indexes
+
+```python
+class Meta:
+    constraints = [
+        models.UniqueConstraint(
+            fields=['name', 'owner'],
+            condition=models.Q(owner__isnull=False),
+            name='uc_org_name_owner',  # uc_<identifier>_<field>
+        ),
+    ]
+    indexes = [
+        models.Index(
+            fields=['candidate_name'],
+            condition=~models.Q(candidate_name=''),
+            name='idx_cand_name',  # idx_<identifier>_<field>
+        ),
+    ]
+```
+
+#### File Upload Fields
+
+```python
+from django.core.files.storage import FileSystemStorage
+
+
+def dynamic_file_storage():
+    return FileSystemStorage()
+
+
+def upload_video_path(instance, filename):
+    return f'videos/{instance.pk}/{filename}'
+
+
+class Media(models.Model):
+    video = models.FileField(
+        upload_to=upload_video_path,
+        storage=dynamic_file_storage,
+        verbose_name=_('video'),
+    )
+```
+
+---
+
+### Admin Rules
+
+Admin files live in `<app>/admin/<model>.py`:
+
+```python
+from django.contrib import admin
+
+from core.admin.base import BaseModelAdmin
+from core.models import Post
+
+
+@admin.register(Post)
+class PostAdmin(BaseModelAdmin):
+    list_display = ('title', 'author', 'created_at')
+    list_display_links = ('title',)
+    search_fields = ('title', 'body')
+    ordering = ('-created_at',)
+
+    # Performance for ForeignKey fields
+    autocomplete_fields = ('author',)
+    list_select_related = ('author',)
+```
+
+#### Minimum Admin Properties
+
+- `list_display`
+- `list_display_links`
+- `search_fields`
+- `ordering`
+
+For ForeignKey fields, always add:
+
+- `autocomplete_fields`
+- `list_select_related`
+
+---
+
+### View Rules
+
+- Views live in `<app>/views/`
+- **Only Class-Based Views** (no function-based views)
+- Separate business logic into **service layer**
+
+```python
+# ❌ Bad - logic in view
+class OrderView(View):
+    def post(self, request):
+        # 50 lines of business logic here
+        ...
+
+
+# ✅ Good - logic in service
+class OrderView(View):
+    def post(self, request):
+        form = self.get_form()
+        if not form.is_valid():
+            return self.form_invalid(form)
+
+        service = OrderService(
+            request=request,
+            form=form,
+            logger=self.logger,
+        )
+        redirect_url = service.process_order()
+        return HttpResponseRedirect(redirect_url)
+```
+
+---
+
+### Internationalization
+
+Never use hardcoded strings:
+
+```python
+# ❌ Bad
+return HttpResponse('Error')
+
+# ✅ Good
+from django.utils.translation import gettext_lazy as _
+
+return HttpResponse(_('Error'))
+```
+
+In templates:
+
+```html
+{% load i18n %}
+
+{% translate "Welcome" %}
+
+{% blocktranslate with name=user.name %}
+Hello, {{ name }}!
+{% endblocktranslate %}
+```
+
+---
+
+### Celery Tasks
+
+Tasks live in `<app>/tasks/`:
+
+```python
+# tasks/notification.py
+from celery import shared_task
+
+from core.services.notification import NotificationService, NotificationServiceError
+
+
+@shared_task(
+    bind=True,
+    max_retries=3,
+    default_retry_delay=60,
+)
+def send_notification_task(self, user_id, message):
+    try:
+        service = NotificationService()
+        service.send(user_id, message)
+    except NotificationServiceError as exc:
+        self.retry(exc=exc)
+```
+
+Register in AppConfig.ready():
+
+```python
+def ready(self):
+    from .tasks import notification  # noqa: F401
+```
+
+---
+
+### Testing
+
+Tests live in `tests/` directory:
+
+```
+tests/
+    test_models_post.py
+    test_views_auth.py
+    test_services_notification.py
+    test_forms_user.py
+    test_tasks_notification.py
+```
+
+Naming convention: `test_<type>_<name>.py`
+
+Use stdlib and Django's test suites:
+
+```python
+from django.test import TestCase
+
+
+class PostModelTest(TestCase):
+    def test_str_returns_title(self):
+        post = Post(title='Hello')
+        self.assertEqual(str(post), 'Hello')
+```
+
+---
+
+### Django System Checks
+
+Create `checks.py` for custom checks:
 
 ```python
 # pylint: disable=W0613
@@ -458,347 +826,16 @@ def check_models(app_configs, **kwargs):
     return errors
 ```
 
-Never use hardcoded un-localized texts; this is not ok: `return Http('Error')` 
-always use `gettext`, for views, use:
-
-`from django.utils.translation import gettext_lazy as _` and `return Http(_('Error'))`
-
-for html, use: `translate` or `blocktranslate` tags.
-
-Models should live in `<app>/models/<model>.py`. Check project’s django model
-approach/style/structure, implement new models according to it.
-
-Basic django model structure:
-
-```python
-from django.db import models
-from django.contrib.auth import get_user_model
-from django.utils.translation import gettext_lazy as _
-
-
-class PostManager(models.Manager):
-    def get_by_natural_key(self, author_nk, title):
-        author = get_user_model().objects.get_by_natural_key(*author_nk)
-        return self.get(author=author, title=title)
-
-
-class Post(models.Model):
-    created_at = models.DateTimeField(
-        auto_now_add=True,
-        verbose_name=_('Created At'),
-    )
-    updated_at = models.DateTimeField(
-        auto_now=True,
-        verbose_name=_('Updated At'),
-    )
-    title = models.CharField(
-        max_length=255,
-        verbose_name=_('Title'),
-    )
-    body = models.TextField(
-        blank=True,
-        verbose_name=_('Body'),
-    )
-    author = models.ForeignKey(
-        to=get_user_model(),
-        related_name='posts',
-        related_query_name='post',
-        on_delete=models.CASCADE,
-        verbose_name=_('Author'),
-    )
-
-    objects = PostManager()
-
-    class Meta:
-        app_label = 'core'
-        verbose_name = _('Post')
-        verbose_name_plural = _('Posts')
-        db_table = 'post'
-
-    def __str__(self):
-        return f'{self.title}'
-
-    def natural_key(self):
-        return (self.author.email, self.title)
-    natural_key.dependencies = ['auth.user']
-```
-
-The project may use a `BaseModel` for Django models. If a `BaseModel` is
-present, follow the existing example and inherit from it when creating new
-models. Possible example:
-
-```python
-from django.conf import settings
-from django.db import models
-from django.urls import reverse
-from django.utils.translation import gettext_lazy as _
-
-from shared.models.base import BaseModel
-from shared.models.managers import BaseModelManager
-
-
-class PageManager(BaseModelManager):
-    def get_by_natural_key(self, slug):
-        return self.get(slug=slug)
-
-
-def get_page_language_choices():
-    return settings.LANGUAGES
-
-
-class Page(BaseModel):
-    ADMIN_INDEX_ORDER = 1000
-
-    language = models.CharField(
-        max_length=2,
-        choices=get_page_language_choices,
-        verbose_name=_('language'),
-    )
-    login_required = models.BooleanField(
-        default=False,
-        verbose_name=_('login required'),
-    )
-    title = models.CharField(
-        max_length=255,
-        verbose_name=_('title'),
-    )
-    slug = models.SlugField(
-        max_length=255,
-        unique=True,
-    )
-    content = models.TextField(
-        verbose_name=_('content'),
-    )
-    enable_markdown = models.BooleanField(
-        default=False,
-        verbose_name=_('enable markdown'),
-    )
-    objects = PageManager()
-
-    class Meta:
-        app_label = 'core'
-        verbose_name = _('Page')
-        verbose_name_plural = _('Pages')
-        db_table = 'page'
-
-        constraints = [
-            models.UniqueConstraint(
-                fields=['language', 'slug'],
-                name='uc_page_lang_slug',
-            ),
-        ]
-
-    def __str__(self):
-        return f'{self.title}'
-
-    def natural_key(self):
-        return (self.slug,)
-
-    def get_absolute_url(self):
-        return reverse('core:page-detail', kwargs={'language': self.language, 'slug': self.slug})
-```
-
-#### Model Rules:
-
-- Must define model manager with `get_by_natural_key` method
-- Never hard-code `choices`, use with callable: `choices=get_page_language_choices`
-  `get_page_language_choices` should return list of tuples.
-
-```python
-class LanguageChoices(models.TextChoices):
-    ENGLISH = 'en', _('english')
-    TURKISH = 'tr', _('turkish')
-```
-
-- Enums are OK for choices:
-
-```python
-from enum import Enum, StrEnum
-
-class CandidateInterviewStatuses(Enum):
-    STARTED = 'started'
-    IN_PROGRESS = 'in_progress'
-    COMPLETED = 'completed'
-    REFRESH_SKIPPED = 'refresh_skipped'
-    INCOMPLETE = 'incomplete'
-
-class CandidateTechSkillLevel(StrEnum):
-    BEGINNER = 'BEGINNER'
-    INTERMEDIATE = 'INTERMEDIATE'
-    ADVANCED = 'ADVANCED'
-    EXPERT = 'EXPERT'
-
-```
-
-- Model should use model manager such as `objects = PageManager()`
-- Model must have `class Meta` with `app_label`, `db_table`, `verbose_name`
-  `verbose_name_plural`. `constraints` and `indexes` are optional.
-- Model must have `natural_key` method (must match with manager’s `get_by_natural_key`)
-  `natural_key.dependencies` if it’s needed.
-- Model meta constraint name should follow `uc_<short-idefentifier>_field`
-- Model meta indexe nname should follow `idx_<short-idefentifier>_field`
-- UniqueConstraint should work for non null fields:
-
-```python
-constraints = [
-    models.UniqueConstraint(
-        fields=['name', 'owner'],
-        condition=Q(owner__isnull=False),
-        name='uc_org_name_owner',
-    ),
-]
-```
-
-- Index non null fields:
-
-```python
-indexes = [
-    models.Index(
-        fields=['candidate_full_name'],
-        name='idx_rsm_cf_name',
-        condition=~models.Q(candidate_full_name=''),
-    ),
-]
-```
-
-- Relational fields must use `to='<model>'` style, `related_name`, `related_query_name`
-  and `on_delete` kwargs:
-
-```python
-interview = models.ForeignKey(
-    to='Interview',
-    related_name='interview_questions',
-    related_query_name='interview_question',
-    on_delete=models.CASCADE,
-    verbose_name=_('interview'),
-)
-```
-
-- Upload related field should use `upload_to=CALLABLE`:
-
-```python
-from django.core.files.storage import FileSystemStorage
-
-def dynamic_file_storage():    # possible to extend this in the future w/o migrating
-    return FileSystemStorage()
-
-def save_uploaded_file(instance, _filename, media_type=None, extension='webm'):
-    ...
-
-def save_video_mp4_file(instance, filename):
-    return save_uploaded_file(instance, filename, 'video', 'mp4')
-
-video_mp4_file = models.FileField(
-    null=True,
-    blank=True,
-    max_length=255,
-    verbose_name=_('video MP4 file'),
-    upload_to=save_video_mp4_file,
-    storage=dynamic_file_storage(),
-)
-```
-
-Model method order is important;
-
-1. field declarations
-1. custom managers
-1. `class Meta`
-1. `__str__`
-1. `save`
-1. `natural_key`
-1. `get_absolute_url`
-
-All the models of this project follows these rules.
-
-#### Model Admin Rules
-
-- Model Admin files should live `<app>/admin/<model>.py`
-- Check project’s admin approach/style/structure, implement new model admins 
-  according to it.
-
-The project may use a `BaseModelAdmin` for Django admins. If a `BaseModelAdmin` is
-present, follow the existing example and inherit from it when creating new
-admins. Possible example:
-
-```python
-from django.contrib import admin
-
-from core.models import Candidate
-from core.admin.base import BaseModelAdmin
-
-@admin.register(Candidate)
-class CandidateAdmin(BaseModelAdmin):
-    ...
-```
-
-- `list_display`, `list_display_links`, `search_fields`, `ordering` are minimum 
-  admin properties.
-- If model has ForeignKey fields; use `autocomplete_fields` and `list_select_related`
-  for admin query performance.
-
-#### View Rules
-
-- View files should live `<app>/views/`
-- We only use `Class-Based-Views`, function based views are not allowed
-
-Try to separate business logic in views, try to put the heavy work on
-**service layer**. I don’t want to see lots of logic in view’s `get` or `post`
-method if possible... Here is a good example from
-`CandidateInterviewView.post`:
-
-```python
-def post(self, request, *_args, **_kwargs):
-    form = self.get_form()
-    if not form.is_valid():
-        return self.form_invalid(form)
-
-    candidate_interview_view_service = CandidateInterviewViewService(
-        request=request,
-        kwargs=self.kwargs,
-        logger=self.logger,
-        form=form,
-    )
-    return HttpResponseRedirect(candidate_interview_view_service.handle_post())
-```
-
-All the heavy work done in `CandidateInterviewViewService`...
-
-### Celery Tasks
-
-- Celery tasks live under `<app>/tasks/`
-- `<APP>Config.ready` is the place for tasks and signals.
-
-If you need to add retry mechanism, feel free to do it. If you have any
-doubts, either consult with me or attempt to resolve the issue by reviewing
-similar implementations in the project.
-
-### Test Conventions
-
-Tests should live under: `tests/`, general convention for test files:
-
-    test_(controllers|forms|services|signals|views|tasks)_name.py
-    test_<app>_(controllers|forms|services|signals|views)_name.py
-
-Try to use stdlib and Django’s test suites.
-
 ---
 
-## Pre-Commit Hooks
-
-If pre-commit config file `.pre-commit-config.yaml` doesn’t exists, ask user to
-install pre-commit:
+### Pre-Commit Hooks
 
 ```bash
 brew install pre-commit
-```
-
-and install hooks:
-
-```bash
 pre-commit install
 ```
 
-Use this minimum config:
+Minimal `.pre-commit-config.yaml`:
 
 ```yaml
 exclude: core/migrations/
@@ -807,128 +844,105 @@ repos:
   - repo: local
     hooks:
       - id: django-check
-        name: "Run django checks"
+        name: Django checks
         entry: scripts/pre-commit/django-check.bash
         language: script
         always_run: true
         pass_filenames: false
 
       - id: ruff
-        name: "Run ruff linter checks"
-        entry: ruff
+        name: Ruff linter
+        entry: ruff check .
         language: system
         types: [python]
-        args: ["check", "."]
 
       - id: pylint
-        name: "Run pylint check"
-        entry: pylint
+        name: Pylint check
+        entry: pylint -rn -sn -d R0401 config core
         language: system
         types: [python]
-        args:
-          [
-            "-rn", # Only display messages
-            "-sn", # Don't display the score
-            "-d R0401",
-            "config",
-            "core",
-          ]
 
       - id: django-test
-        name: "Run tests"
+        name: Django tests
         entry: scripts/pre-commit/run-tests.bash
         language: system
         types: [python]
         pass_filenames: false
 ```
 
-`django-check.bash`:
+`scripts/pre-commit/django-check.bash`:
 
 ```bash
 #!/usr/bin/env bash
-set -e
-set -o pipefail
-set -o errexit
-set -o nounset
+set -euo pipefail
 
 DJANGO_ENV=production python manage.py check --deploy || exit 0
 ```
 
-`run-tests.bash`:
+`scripts/pre-commit/run-tests.bash`:
 
 ```bash
 #!/usr/bin/env bash
+set -euo pipefail
 
-set -e
-set -o pipefail
-set -o errexit
-set -o nounset
-
-coverage run manage.py test --failfast   # pip install coverage required
+coverage run manage.py test --failfast
 ```
 
 ---
 
-## Commit Message Guidelines
+### Commit Messages
 
-- Prefix: `[claude-opus]:` or `[claude-sonnet]:` based on model
-- Short summary in lowercase (max 50 chars)
-- Blank line, then bullet points with details
-- Include Claude Code footer
-- Use **present tense** in commit messages.
-- Always start the message with a **lowercase letter**.
-- Start with a **verb**, followed by a brief and clear description.
+Format:
 
-Examples:
+```
+[claude]: <verb> <description in lowercase>
 
-- `fix login redirect issue`
-- `implement user profile page`
-- `remove unused dependencies`
+- Detail 1
+- Detail 2
 
-**If related to a GitHub issue**:
+Fixes #123
 
-- Add `Fixes #ISSUE-NUMBER` or `Closes #ISSUE-NUMBER` at the end of the commit
-  message. This auto closes issue on GitHub.
-- Include a direct link to the related GitHub issue.
-
-Also this commit-template is helpful:
-
-    #
-    # 3456789x123456789x123456789x123456789x123456789x
-    # Short description (subject) : 50 chars
-
-    # 3456789x123456789x123456789x123456789x123456789x123456789x123456789x12
-    # Long description : 72 chars
-    #
-    # - Why was this change necessary?
-    # - How does it address the problem?
-    # - Are there any side effects?
-    #
-    # Fixes #ticket
-    # Closes #ticket, #ticket, #ticket
-    #
-    # Include a link to the ticket, if any.
-    #
+🤖 Generated with [Claude Code](https://claude.ai/code)
+Co-Authored-By: Claude <noreply@anthropic.com>
+```
 
 Example:
 
-    [claude-opus]: add TXT and DOCX resume upload support
-    
-    - Convert TXT/DOCX files to PDF on upload using fpdf2 and python-docx
-    - Skip text extraction for pre-extracted content
-    - Add Unicode font support for Turkish characters
-    
-    🤖 Generated with [Claude Code](https://claude.com/claude-code)
-    
-    Co-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>
+```
+[claude]: add user notification service
+
+- Implement NotificationService with retry logic
+- Add NotificationServiceError for error handling
+- Create Celery task for async notifications
+
+Fixes #42
+
+🤖 Generated with [Claude Code](https://claude.ai/code)
+Co-Authored-By: Claude <noreply@anthropic.com>
+```
+
+---
+
+## Quick Reference
+
+| Task | Command |
+|------|---------|
+| Check Python version | `python --version` |
+| Run linter | `ruff check .` |
+| Format code | `ruff format .` |
+| Run pylint | `pylint config core` |
+| Run tests | `python manage.py test` |
+| Run with coverage | `coverage run manage.py test` |
+| Django check | `python manage.py check` |
+| Django check deploy | `python manage.py check --deploy` |
+| Make migrations | `python manage.py makemigrations` |
+| Apply migrations | `python manage.py migrate` |
 
 ---
 
 ## Resources
 
-- https://docs.djangoproject.com/en/5.2/contents/
-- https://docs.djangoproject.com/en/6.0/contents/
-- https://docs.astral.sh/ruff/
-- https://pylint.readthedocs.io/en/latest/
-- https://github.com/astral-sh/ruff
-- https://github.com/pylint-dev/pylint
+- [Django Documentation](https://docs.djangoproject.com/)
+- [Ruff Documentation](https://docs.astral.sh/ruff/)
+- [Pylint Documentation](https://pylint.readthedocs.io/)
+- [Celery Documentation](https://docs.celeryq.dev/)
