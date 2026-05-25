@@ -35,6 +35,9 @@ python -c "import django; print(django.VERSION)"
 
 # Check if ruff is available
 command -v ruff
+
+# Check if pylint is available
+command -v pylint
 ```
 
 ---
