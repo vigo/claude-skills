@@ -13,9 +13,9 @@ What Skills are available?
 ## Installation
 
 ```bash
-npx skills add vigo/skills/code-like-djangonout
-npx skills add vigo/skills/code-like-gopher
-npx skills add vigo/skills/explaining-code
+npx skills add vigo/claude-skills/code-like-djangonout
+npx skills add vigo/claude-skills/code-like-gopher
+npx skills add vigo/claude-skills/explaining-code
 ```
 
 Restart your claude; `/skills`
